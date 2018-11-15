@@ -1,14 +1,14 @@
 ﻿USE CustomMVCIdentity;
 GO
 
-CREATE TABLE [dbo].[Users](
+CREATE TABLE [dbo].[tbUser](
 	[Id] [nvarchar](50) NOT NULL,
 	[Username] [nvarchar](50) NOT NULL,
 	[Email] [nvarchar](50) NOT NULL,
 	[Password] [nvarchar](50) NOT NULL,
 	[Status] [int] NOT NULL DEFAULT(0),
 	[CreatedOnDate] [datetime] NULL,
- CONSTRAINT [PK_Users] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_tbUser] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
@@ -16,13 +16,13 @@ CREATE TABLE [dbo].[Users](
 
 GO
 
-ALTER TABLE [dbo].[Users] ADD  CONSTRAINT [DF_Users_CreatedOnDate]  DEFAULT (getdate()) FOR [CreatedOnDate]
+ALTER TABLE [dbo].[tbUser] ADD  CONSTRAINT [DF_tbUser_CreatedOnDate]  DEFAULT (getdate()) FOR [CreatedOnDate]
 GO
 
-CREATE TABLE [dbo].[Roles](
+CREATE TABLE [dbo].[tbRole](
 	[Id] [nvarchar](50) NOT NULL,
 	[Name] [nvarchar](50) NOT NULL,
- CONSTRAINT [PK_Roles] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_tbRole] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
@@ -30,11 +30,11 @@ CREATE TABLE [dbo].[Roles](
 
 GO
 
-CREATE TABLE [dbo].[UserRoles](
+CREATE TABLE [dbo].[tbUserRole](
 	[UserRoleID] [nvarchar](50) NOT NULL,
 	[UserID] [nvarchar](50) NOT NULL,
 	[RoleID] [nvarchar](50) NOT NULL,
- CONSTRAINT [PK_UserRoles] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_tbUserRole] PRIMARY KEY CLUSTERED 
 (
 	[UserRoleID] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
@@ -42,7 +42,7 @@ CREATE TABLE [dbo].[UserRoles](
 
 GO
 
-CREATE PROCEDURE [dbo].[NewUser]
+CREATE PROCEDURE [dbo].[spUserInsert]
 	-- Add the parameters for the stored procedure here
 	@ID nvarchar(50),
 	@UserName nvarchar(50),
@@ -56,7 +56,7 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	INSERT INTO Users(
+	INSERT INTO tbUser(
 		ID,
 		UserName ,
 		Email ,
@@ -72,7 +72,7 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE [dbo].[DeleteUser]
+CREATE PROCEDURE [dbo].[spUserDeleteID]
 	-- Add the parameters for the stored procedure here
 	@ID nvarchar(50)
 AS
@@ -82,12 +82,12 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	DELETE FROM Users
+	DELETE FROM tbUser
 	WHERE ID = @ID
 END
 GO
 
-CREATE PROCEDURE [dbo].[GetUser]
+CREATE PROCEDURE [dbo].[spGetUserByID]
 	-- Add the parameters for the stored procedure here
 	@ID nvarchar(50)
 AS
@@ -97,12 +97,12 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	SELECT * FROM Users
+	SELECT * FROM tbUser
 	WHERE ID = @ID
 END
 GO
 
-CREATE PROCEDURE [dbo].[GetUserByUsername]
+CREATE PROCEDURE [dbo].[spGetUserByUsername]
 	-- Add the parameters for the stored procedure here
 	@Username nvarchar(50)
 AS
@@ -112,13 +112,13 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	SELECT * FROM Users
+	SELECT * FROM tbUser
 	WHERE Username = @Username
 END
 GO
 
 
-CREATE PROCEDURE [dbo].[UpdateUser]
+CREATE PROCEDURE [dbo].[spUserUpdate]
 	-- Add the parameters for the stored procedure here
 	@UserName nvarchar(50),
 	@Email nvarchar(50)
@@ -129,13 +129,13 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	UPDATE Users
+	UPDATE tbUser
 	SET Email = @Email
 	WHERE UserName = @UserName
 END
 GO
 
-CREATE PROCEDURE [dbo].[NewUserRole]
+CREATE PROCEDURE [dbo].[spUserRoleInsert]
 	@UserID nvarchar(50),
 	@RoleName nvarchar(50)
 AS
@@ -144,12 +144,12 @@ BEGIN
 	DECLARE @RoleID nvarchar(50)
 	
 	SELECT @RoleID = Id
-	FROM Roles
+	FROM tbRole
 	WHERE Name = @RoleName
 	
 	IF @RoleID IS NULL
 		BEGIN
-			INSERT INTO Roles(
+			INSERT INTO tbRole(
 				Id,
 				Name
 			)VALUES(
@@ -158,17 +158,17 @@ BEGIN
 			)
 			
 			SELECT @RoleID = Id
-			FROM Roles
+			FROM tbRole
 			WHERE Name = @RoleName
 		END
 	
 	SELECT @UserRoleID = UserRoleID
-	FROM UserRoles
+	FROM tbUserRole
 	WHERE UserID = @UserID AND RoleID = @RoleID
 	
 	IF @UserRoleID IS NULL
 		BEGIN
-			INSERT INTO UserRoles(
+			INSERT INTO tbUserRole(
 				UserRoleID,
 				UserID,
 				RoleID
@@ -182,7 +182,7 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE [dbo].[RemoveUserRole]
+CREATE PROCEDURE [dbo].[spUserRoleDelete]
 	@UserID nvarchar(50),
 	@RoleName nvarchar(50)
 AS
@@ -190,26 +190,26 @@ BEGIN
 	DECLARE @RoleID nvarchar(50)
 	
 	SELECT @RoleID = Id
-	FROM Roles
+	FROM tbRole
 	WHERE Name = @RoleName
 	
 	IF @RoleID IS NULL
 		BEGIN
-			Delete FROM UserRoles
+			Delete FROM tbUserRole
 			WHERE RoleID = @RoleID AND UserID = @UserID
 		END
 
 END
 GO
 
-CREATE PROCEDURE [dbo].[GetUserRoles]
+CREATE PROCEDURE [dbo].[spGetUserRoleByID]
 	@UserID nvarchar(50)
 AS
 BEGIN
 	
 	SELECT R.Name As RoleName
-	FROM UserRoles UR
-	INNER JOIN Roles R
+	FROM tbUserRole UR
+	INNER JOIN tbRole R
 	ON UR.RoleID = R.Id
 	WHERE UR.UserID = @UserID
 	
@@ -229,7 +229,7 @@ SET @RoleIDMember = NewID()
 SET @UserIDAdmin = NewID()
 SET @UserIDMember = NewID()
 		
-INSERT INTO Roles(
+INSERT INTO tbRole(
 	ID,
 	Name
 )VALUES(
@@ -237,7 +237,7 @@ INSERT INTO Roles(
 	'Administrator'
 )
 	
-INSERT INTO Roles(
+INSERT INTO tbRole(
 	ID,
 	Name
 )VALUES(
@@ -245,7 +245,7 @@ INSERT INTO Roles(
 	'Member'
 )
 		
-INSERT INTO Users(
+INSERT INTO tbUser(
 	ID,
 	UserName ,
 	Email ,
@@ -255,7 +255,7 @@ INSERT INTO Users(
 	@UserIDAdmin,'admin', 'admin@example.com', '1234567', 1
 )
 	
-INSERT INTO Users(
+INSERT INTO tbUser(
 	ID,
 	UserName ,
 	Email ,
@@ -265,7 +265,7 @@ INSERT INTO Users(
 	@UserIDMember,'member', 'member@example.com', '1234567', 1
 )
 	
-INSERT INTO UserRoles(
+INSERT INTO tbUserRole(
 	UserRoleID,
 	UserID,
 	RoleID
@@ -273,7 +273,7 @@ INSERT INTO UserRoles(
 	NewID(), @UserIDAdmin, @RoleIDAdmin
 )
 	
-INSERT INTO UserRoles(
+INSERT INTO tbUserRole(
 	UserRoleID,
 	UserID,
 	RoleID

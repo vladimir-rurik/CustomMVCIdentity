@@ -18,7 +18,7 @@ namespace IdentityManagement.DAL
             parameters.Add(new ParameterInfo() { ParameterName = "Email", ParameterValue = objUser.Email });
             parameters.Add(new ParameterInfo() { ParameterName = "Password", ParameterValue = objUser.Password });
             parameters.Add(new ParameterInfo() { ParameterName = "Status", ParameterValue = objUser.Status });
-            int success = SqlHelper.ExecuteQuery("NewUser", parameters);
+            int success = SqlHelper.ExecuteQuery("spUserInsertID", parameters);
             return success;
         }
 
@@ -26,7 +26,7 @@ namespace IdentityManagement.DAL
         {
             List<ParameterInfo> parameters = new List<ParameterInfo>();
             parameters.Add(new ParameterInfo() { ParameterName = "Id", ParameterValue = objUser.Id });
-            int success = SqlHelper.ExecuteQuery("DeleteUser", parameters);
+            int success = SqlHelper.ExecuteQuery("spUserDeleteID", parameters);
             return success;
         }
 
@@ -34,7 +34,7 @@ namespace IdentityManagement.DAL
         {
             List<ParameterInfo> parameters = new List<ParameterInfo>();
             parameters.Add(new ParameterInfo() { ParameterName = "Id", ParameterValue = id });
-            ApplicationUser oUser = SqlHelper.GetRecord<ApplicationUser>("GetUser", parameters);
+            ApplicationUser oUser = SqlHelper.GetRecord<ApplicationUser>("spGetUserByID", parameters);
             return oUser;
         }
 
@@ -42,7 +42,7 @@ namespace IdentityManagement.DAL
         {
             List<ParameterInfo> parameters = new List<ParameterInfo>();
             parameters.Add(new ParameterInfo() { ParameterName = "Username", ParameterValue = userName });
-            ApplicationUser oUser = SqlHelper.GetRecord<ApplicationUser>("GetUserByUsername", parameters);
+            ApplicationUser oUser = SqlHelper.GetRecord<ApplicationUser>("spGetUserByUsername", parameters);
             return oUser;
         }
 
@@ -50,7 +50,7 @@ namespace IdentityManagement.DAL
         {
             List<ParameterInfo> parameters = new List<ParameterInfo>();
             parameters.Add(new ParameterInfo() { ParameterName = "Email", ParameterValue = objUser.Email });
-            int success = SqlHelper.ExecuteQuery("UpdateUser", parameters);
+            int success = SqlHelper.ExecuteQuery("spUserUpdate", parameters);
             return success;
         }
     }
