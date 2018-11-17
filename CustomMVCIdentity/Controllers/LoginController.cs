@@ -11,6 +11,7 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Security;
 
 namespace CustomMVCIdentity.Controllers
 {
@@ -42,10 +43,23 @@ namespace CustomMVCIdentity.Controllers
             }
         }
 
-        public ActionResult Logout()
+        public ActionResult Logout( string logout_reason = null )
         {
-            SignInManager.AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
-            return RedirectToAction("Index", "Home");
+            FormsAuthentication.SignOut();
+            System.Web.HttpContext.Current.User = new System.Security.Principal.GenericPrincipal( new System.Security.Principal.GenericIdentity( string.Empty ), null );
+            HttpCookie expire_auth = new HttpCookie( FormsAuthentication.FormsCookieName );
+            expire_auth.Expires = DateTime.Now.AddYears( -1 );
+            expire_auth.Path = Shared.Path;
+            Response.Cookies.Add( expire_auth );
+            System.Web.HttpContext.Current.Session.Contents.Clear();
+            System.Web.HttpContext.Current.Session.Abandon();
+
+            ViewBag.UserId = "logout";
+            Shared.logout_reason = logout_reason;
+
+            System.Web.HttpContext.Current.Items.Remove( "user_id" );
+
+            return View( "Notify" );
         }
 
         // GET: Login

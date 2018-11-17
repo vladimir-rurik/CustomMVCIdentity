@@ -1,0 +1,21 @@
+﻿@{
+    //Layout = null;
+    ViewBag.Title = "";
+    ViewBag.NoHeader = true;
+    ViewBag.NoLog = true;
+}
+<script>
+	var id = "@ViewBag.UserId";
+	var formurl = "@(Shared.Path)Login/Home/";
+	$(document).ready(function () {
+		if ((typeof (window.external) !== "undefined") && (typeof (window.external.notify) !== "undefined")) {
+			//$("#debug").text("Notify-@ViewBag.UserId");
+			if (id == "") id = "logout"; //if unknown thorwing logout just in case.
+			window.external.notify(id);
+		} else {
+			document.location = formurl + "?ReturnUrl=@(ViewBag.ReturnUrl)";
+		}
+	});
+</script>
+<div id="debug">
+</div>
